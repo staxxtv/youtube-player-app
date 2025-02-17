@@ -1,9 +1,22 @@
 
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  const handleSignUp = () => {
+    // TODO: Implement signup logic
+    navigate("/home");
+  };
+
+  const handleSignIn = () => {
+    // TODO: Implement signin logic
+    navigate("/home");
+  };
+
   return (
-    <Layout>
+    <Layout hideNavigation>
       <div className="min-h-screen p-6 animate-fade-in">
         <div className="max-w-md mx-auto space-y-8">
           <div className="text-center space-y-4">
@@ -14,10 +27,16 @@ const Index = () => {
           </div>
           
           <div className="space-y-4">
-            <button className="w-full bg-primary text-white rounded-lg py-3 px-4 font-medium hover:opacity-90 transition-opacity">
+            <button 
+              onClick={handleSignUp}
+              className="w-full bg-primary text-white rounded-lg py-3 px-4 font-medium hover:opacity-90 transition-opacity"
+            >
               Sign Up
             </button>
-            <button className="w-full bg-white text-primary border border-primary rounded-lg py-3 px-4 font-medium hover:bg-primary/5 transition-colors">
+            <button 
+              onClick={handleSignIn}
+              className="w-full bg-white text-primary border border-primary rounded-lg py-3 px-4 font-medium hover:bg-primary/5 transition-colors"
+            >
               Sign In
             </button>
           </div>

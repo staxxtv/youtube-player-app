@@ -3,15 +3,16 @@ import Navigation from "./Navigation";
 
 interface LayoutProps {
   children: React.ReactNode;
+  hideNavigation?: boolean;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({ children, hideNavigation = false }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="pb-20">
+      <main className={!hideNavigation ? "pb-20" : ""}>
         {children}
       </main>
-      <Navigation />
+      {!hideNavigation && <Navigation />}
     </div>
   );
 };

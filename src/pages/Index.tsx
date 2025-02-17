@@ -19,21 +19,39 @@ const Index = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
+        
         if (error) throw error;
-        toast.success("Check your email for the confirmation link!");
+        
+        if (data?.user?.identities?.length === 0) {
+          toast.error("An account with this email already exists.");
+        } else {
+          toast.success("Check your email for the confirmation link!");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+        
+        if (error) {
+          if (error.message === "Invalid login credentials") {
+            toast.error("Invalid email or password. Please try again.");
+          } else if (error.message.includes("Email not confirmed")) {
+            toast.error("Please confirm your email before signing in.");
+          } else {
+            throw error;
+          }
+          return;
+        }
+        
         navigate("/home");
       }
     } catch (error) {
+      console.error("Authentication error:", error);
       toast.error(error instanceof Error ? error.message : "Authentication failed");
     } finally {
       setLoading(false);

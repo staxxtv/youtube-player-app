@@ -9,57 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      favorites: {
-        Row: {
-          channel_title: string
-          created_at: string
-          id: string
-          thumbnail_url: string
-          title: string
-          user_id: string | null
-          video_id: string
-        }
-        Insert: {
-          channel_title: string
-          created_at?: string
-          id?: string
-          thumbnail_url: string
-          title: string
-          user_id?: string | null
-          video_id: string
-        }
-        Update: {
-          channel_title?: string
-          created_at?: string
-          id?: string
-          thumbnail_url?: string
-          title?: string
-          user_id?: string | null
-          video_id?: string
-        }
-        Relationships: []
-      }
-      search_history: {
-        Row: {
-          created_at: string
-          id: string
-          query: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          query: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          query?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never

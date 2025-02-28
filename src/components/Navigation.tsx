@@ -8,7 +8,7 @@ const Navigation = () => {
   const isActive = (path: string) => location.pathname === path;
   
   const navItems = [
-    { icon: Home, label: "Home", path: "/" },
+    { icon: Home, label: "Home", path: "/home" },
     { icon: Search, label: "Search", path: "/search" },
     { icon: Heart, label: "Favorites", path: "/favorites" },
     { icon: Settings, label: "Settings", path: "/settings" },

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -91,10 +90,21 @@ const Home = () => {
         </div>
 
         <div className="p-4 max-w-screen-xl mx-auto">
+          {/* Popular Categories - Moved to the top */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">Popular Categories</h2>
+            <div className="flex flex-wrap gap-2">
+              {["Music", "Gaming", "News", "Sports", "Entertainment", "Education"].map((category) => (
+                <Button key={category} variant="outline" size="sm" className="rounded-full">
+                  {category}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           {/* Trending Section */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold mb-4">Trending Now</h2>
-            
             {(isLoading || isLoadingVideos) ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Array(6).fill(0).map((_, index) => (
@@ -135,18 +145,6 @@ const Home = () => {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Popular Categories */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Popular Categories</h2>
-            <div className="flex flex-wrap gap-2">
-              {["Music", "Gaming", "News", "Sports", "Entertainment", "Education"].map((category) => (
-                <Button key={category} variant="outline" size="sm" className="rounded-full">
-                  {category}
-                </Button>
-              ))}
-            </div>
           </div>
         </div>
       </div>

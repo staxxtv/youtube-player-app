@@ -9,11 +9,12 @@ import VideoDetails from "./components/VideoDetails";
 import ChannelInfo from "./components/ChannelInfo";
 import VideoTabs from "./components/VideoTabs";
 import { useVideoData } from "./hooks/useVideoData";
-import { VideoDetails as VideoDetailsType, ChannelDetails, Comment } from "./types";
+import { useAuth } from "@/context/AuthContext";
 
 const Player = () => {
   const { videoId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { 
     videoDetails, 
     channelDetails, 
@@ -29,6 +30,11 @@ const Player = () => {
 
   const favoriteChannel = async () => {
     if (!channelDetails) return;
+    
+    if (!user) {
+      toast.error('Please login to add channels to favorites');
+      return;
+    }
     
     try {
       if (isFavoriteChannel) {
@@ -66,6 +72,11 @@ const Player = () => {
 
   const saveVideo = async () => {
     if (!videoDetails) return;
+    
+    if (!user) {
+      toast.error('Please login to save videos to your library');
+      return;
+    }
     
     try {
       if (videoSaved) {

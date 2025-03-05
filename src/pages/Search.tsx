@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Plus, Search as SearchIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 interface VideoItem {
   id: { videoId: string };
@@ -32,6 +33,7 @@ interface SearchHistory {
 const Search = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [recentSearches, setRecentSearches] = useState<SearchHistory[]>([]);
@@ -67,7 +69,6 @@ const Search = () => {
   };
 
   const fetchTrendingSearches = async () => {
-    // This could be fetched from a real API in production
     setTrendingSearches([
       "music", "pop songs", "latest hits", "dance music", "rock classics"
     ]);
@@ -95,14 +96,12 @@ const Search = () => {
       setVideos(data.items || []);
       setShowRecent(false);
 
-      // Save search query to history
       const { error: insertError } = await supabase
         .from('search_history')
         .insert({ query: query.trim() });
       
       if (insertError) throw insertError;
       
-      // Refresh recent searches
       fetchRecentSearches();
     } catch (error) {
       console.error('Search error:', error);
@@ -120,7 +119,6 @@ const Search = () => {
       
       if (error) throw error;
 
-      // Get channel details first to display name
       const channelResponse = await fetch(
         `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${YOUTUBE_API_KEY}`
       );
@@ -133,7 +131,6 @@ const Search = () => {
         setQuery(`Channel: ${channelTitle}`);
       }
 
-      // Get channel videos
       const response = await fetch(
         `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=10&type=video&key=${YOUTUBE_API_KEY}`
       );
@@ -160,7 +157,6 @@ const Search = () => {
     setQuery(searchQuery);
     setShowRecent(false);
     
-    // Execute the search with this query
     setTimeout(() => {
       searchVideos();
     }, 100);
@@ -173,13 +169,17 @@ const Search = () => {
   const saveVideo = async (e: React.MouseEvent, video: VideoItem) => {
     e.stopPropagation();
     
+    if (!user) {
+      toast.error('Please login to save videos to your library');
+      return;
+    }
+    
     try {
-      // Check if already saved
       const { data, error: checkError } = await supabase
         .from('favorites')
         .select('*')
         .eq('video_id', video.id.videoId)
-        .not('title', 'ilike', 'Channel:%') // Exclude channel entries
+        .not('title', 'ilike', 'Channel:%')
         .maybeSingle();
       
       if (checkError && checkError.code !== 'PGRST116') {
@@ -191,7 +191,6 @@ const Search = () => {
         return;
       }
       
-      // Save to favorites
       const { error } = await supabase
         .from('favorites')
         .insert({
@@ -199,7 +198,7 @@ const Search = () => {
           title: video.snippet.title,
           channel_title: video.snippet.channelTitle,
           thumbnail_url: video.snippet.thumbnails.medium.url,
-          user_id: null // This will be filled by RLS if user is logged in
+          user_id: null
         });
       
       if (error) throw error;

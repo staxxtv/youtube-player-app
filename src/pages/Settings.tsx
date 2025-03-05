@@ -10,10 +10,9 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 
 const Settings = () => {
-  const { user, signIn, signUp, signOut } = useAuth();
+  const { user, signIn, signUp, signOut, darkMode, setDarkMode } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [authTab, setAuthTab] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -74,16 +73,21 @@ const Settings = () => {
     }
   };
 
+  const handleToggleDarkMode = (value: boolean) => {
+    setDarkMode(value);
+    toast.success(`${value ? 'Dark' : 'Light'} mode enabled`);
+  };
+
   return (
     <Layout>
       <div className="p-6 animate-fade-in">
         <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6">Settings</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Settings</h1>
           <div className="space-y-4">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center">
                 <h2 
-                  className="font-medium text-gray-900 cursor-pointer hover:text-primary transition-colors"
+                  className="font-medium text-gray-900 dark:text-white cursor-pointer hover:text-primary transition-colors"
                   onClick={handleAccountClick}
                 >
                   Account
@@ -93,9 +97,9 @@ const Settings = () => {
                     <DialogTrigger asChild>
                       <Button variant="outline">Login / Sign Up</Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="sm:max-w-[425px] dark:bg-gray-800">
                       <DialogHeader>
-                        <DialogTitle>{authTab === "login" ? "Login" : "Sign Up"}</DialogTitle>
+                        <DialogTitle className="dark:text-white">{authTab === "login" ? "Login" : "Sign Up"}</DialogTitle>
                       </DialogHeader>
                       <Tabs value={authTab} onValueChange={(v) => setAuthTab(v as "login" | "signup")} className="w-full">
                         <TabsList className="grid grid-cols-2 w-full">
@@ -104,22 +108,24 @@ const Settings = () => {
                         </TabsList>
                         <form onSubmit={handleAuthSubmit} className="space-y-4 mt-4">
                           <div className="space-y-2">
-                            <label className="text-sm font-medium">Email</label>
+                            <label className="text-sm font-medium dark:text-white">Email</label>
                             <Input 
                               type="email" 
                               value={email} 
                               onChange={(e) => setEmail(e.target.value)} 
                               required 
+                              className="dark:bg-gray-700 dark:text-white"
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-sm font-medium">Password</label>
+                            <label className="text-sm font-medium dark:text-white">Password</label>
                             <Input 
                               type="password" 
                               value={password} 
                               onChange={(e) => setPassword(e.target.value)} 
                               required 
                               minLength={6}
+                              className="dark:bg-gray-700 dark:text-white"
                             />
                           </div>
                           <Button type="submit" className="w-full" disabled={loading}>
@@ -136,16 +142,16 @@ const Settings = () => {
               {isEditing && user ? (
                 <form onSubmit={handleUpdateAccount} className="mt-4 space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
-                    <Input type="email" value={user.email || ''} readOnly className="mt-1 bg-gray-100" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <Input type="email" value={user.email || ''} readOnly className="mt-1 bg-gray-100 dark:bg-gray-700 dark:text-white" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Current Password</label>
-                    <Input type="password" placeholder="Current password" className="mt-1" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
+                    <Input type="password" placeholder="Current password" className="mt-1 dark:bg-gray-700 dark:text-white" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">New Password</label>
-                    <Input type="password" placeholder="New password" className="mt-1" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+                    <Input type="password" placeholder="New password" className="mt-1 dark:bg-gray-700 dark:text-white" />
                   </div>
                   <div className="flex gap-2">
                     <button 
@@ -157,26 +163,26 @@ const Settings = () => {
                     <button 
                       type="button"
                       onClick={() => setIsEditing(false)}
-                      className="flex-1 bg-gray-100 text-gray-700 rounded-lg py-2 px-4 font-medium hover:bg-gray-200 transition-colors"
+                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg py-2 px-4 font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                     >
                       Cancel
                     </button>
                   </div>
                 </form>
               ) : (
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {user ? "Manage your account settings" : "Login to manage your account"}
                 </p>
               )}
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h2 className="font-medium text-gray-900">Preferences</h2>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+              <h2 className="font-medium text-gray-900 dark:text-white">Preferences</h2>
               <div className="mt-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-gray-700">App Notifications</p>
-                    <p className="text-sm text-gray-500">Get notified about updates</p>
+                    <p className="font-medium text-gray-700 dark:text-gray-300">App Notifications</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Get notified about updates</p>
                   </div>
                   <Switch
                     checked={notificationsEnabled}
@@ -185,20 +191,20 @@ const Settings = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-gray-700">Dark Mode</p>
-                    <p className="text-sm text-gray-500">Toggle dark theme</p>
+                    <p className="font-medium text-gray-700 dark:text-gray-300">Dark Mode</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Toggle dark theme</p>
                   </div>
                   <Switch
                     checked={darkMode}
-                    onCheckedChange={setDarkMode}
+                    onCheckedChange={handleToggleDarkMode}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h2 className="font-medium text-gray-900">About</h2>
-              <p className="text-sm text-gray-500 mt-1">Version 1.0.1, created by Staxx TV</p>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+              <h2 className="font-medium text-gray-900 dark:text-white">About</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Version 1.0.1, created by Staxx TV</p>
             </div>
           </div>
         </div>

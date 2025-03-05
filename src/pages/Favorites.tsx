@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { Trash2 } from "lucide-react";
 
 interface FavoriteVideo {
   id: string;
@@ -32,36 +33,44 @@ const Library = () => {
   const [channels, setChannels] = useState<FavoriteChannel[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchLibrary = async () => {
+    setLoading(true);
+    try {
+      // Fetch saved videos (excluding channel entries)
+      const { data: videoData, error: videoError } = await supabase
+        .from('favorites')
+        .select('*')
+        .not('title', 'ilike', 'Channel:%')
+        .order('created_at', { ascending: false });
+      
+      if (videoError) throw videoError;
+      setVideos(videoData || []);
+
+      // Fetch favorite channels (using title pattern)
+      const { data: channelData, error: channelError } = await supabase
+        .from('favorites')
+        .select('*')
+        .ilike('title', 'Channel:%')
+        .order('created_at', { ascending: false });
+      
+      if (channelError) throw channelError;
+      setChannels(channelData as unknown as FavoriteChannel[] || []);
+    } catch (error) {
+      console.error('Error fetching library:', error);
+      toast.error('Failed to load library');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchLibrary = async () => {
-      setLoading(true);
-      try {
-        // Fetch saved videos (excluding channel entries)
-        const { data: videoData, error: videoError } = await supabase
-          .from('favorites')
-          .select('*')
-          .not('title', 'ilike', 'Channel:%');
-        
-        if (videoError) throw videoError;
-        setVideos(videoData || []);
-
-        // Fetch favorite channels (using title pattern)
-        const { data: channelData, error: channelError } = await supabase
-          .from('favorites')
-          .select('*')
-          .ilike('title', 'Channel:%');
-        
-        if (channelError) throw channelError;
-        setChannels(channelData as unknown as FavoriteChannel[] || []);
-      } catch (error) {
-        console.error('Error fetching library:', error);
-        toast.error('Failed to load library');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLibrary();
+    if (user) {
+      fetchLibrary();
+    } else {
+      setVideos([]);
+      setChannels([]);
+      setLoading(false);
+    }
   }, [user]);
 
   const handleVideoClick = (videoId: string) => {
@@ -78,15 +87,63 @@ const Library = () => {
     }
   };
 
+  const removeVideo = async (id: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (!user) {
+      toast.error('You need to be logged in to remove items from your library');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast.success('Video removed from library');
+      fetchLibrary();
+    } catch (error) {
+      console.error('Error removing video:', error);
+      toast.error('Failed to remove video from library');
+    }
+  };
+
+  const removeChannel = async (id: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (!user) {
+      toast.error('You need to be logged in to remove items from your library');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast.success('Channel removed from favorites');
+      fetchLibrary();
+    } catch (error) {
+      console.error('Error removing channel:', error);
+      toast.error('Failed to remove channel from favorites');
+    }
+  };
+
   return (
     <Layout>
       <div className="p-6 animate-fade-in">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6">Library</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Library</h1>
           
           {!user ? (
-            <div className="text-center bg-white p-6 rounded-lg shadow-sm">
-              <p className="text-gray-600 mb-4">Login to view and manage your library</p>
+            <div className="text-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">Login to view and manage your library</p>
               <Button
                 onClick={() => navigate('/settings')}
                 variant="default"
@@ -103,13 +160,13 @@ const Library = () => {
               
               <TabsContent value="videos">
                 {loading ? (
-                  <div className="text-center py-8 animate-pulse">Loading...</div>
+                  <div className="text-center py-8 animate-pulse dark:text-white">Loading...</div>
                 ) : videos.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {videos.map((video) => (
                       <div
                         key={video.id}
-                        className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group"
                         onClick={() => handleVideoClick(video.video_id)}
                       >
                         <div className="aspect-video relative overflow-hidden rounded-t-lg">
@@ -118,12 +175,19 @@ const Library = () => {
                             alt={video.title}
                             className="w-full h-full object-cover"
                           />
+                          <button 
+                            className="absolute top-2 right-2 bg-black/70 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => removeVideo(video.id, e)}
+                            aria-label="Remove from library"
+                          >
+                            <Trash2 className="h-4 w-4 text-white" />
+                          </button>
                         </div>
                         <div className="p-4">
-                          <h3 className="font-semibold text-gray-900 line-clamp-2">
+                          <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">
                             {video.title}
                           </h3>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             {video.channel_title}
                           </p>
                         </div>
@@ -131,7 +195,7 @@ const Library = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center text-gray-500 py-8">
+                  <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                     <p>Your saved videos will appear here</p>
                   </div>
                 )}
@@ -139,13 +203,13 @@ const Library = () => {
 
               <TabsContent value="channels">
                 {loading ? (
-                  <div className="text-center py-8 animate-pulse">Loading...</div>
+                  <div className="text-center py-8 animate-pulse dark:text-white">Loading...</div>
                 ) : channels.length > 0 ? (
                   <div className="grid gap-4">
                     {channels.map((channel) => (
                       <div
                         key={channel.id}
-                        className="flex items-center space-x-3 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        className="flex items-center space-x-3 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer group relative"
                         onClick={() => fetchChannelVideos(channel.video_id)}
                       >
                         <Avatar className="h-12 w-12">
@@ -155,16 +219,23 @@ const Library = () => {
                           />
                         </Avatar>
                         <div>
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-gray-900 dark:text-white">
                             {channel.channel_title}
                           </h3>
-                          <p className="text-sm text-gray-600">Tap to view videos</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Tap to view videos</p>
                         </div>
+                        <button 
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => removeChannel(channel.id, e)}
+                          aria-label="Remove from favorites"
+                        >
+                          <Trash2 className="h-4 w-4 text-white" />
+                        </button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center text-gray-500 py-8">
+                  <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                     <p>Your favorite channels will appear here</p>
                   </div>
                 )}

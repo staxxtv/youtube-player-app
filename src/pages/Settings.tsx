@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import { Switch } from "@/components/ui/switch";
@@ -96,7 +95,7 @@ const Settings = () => {
 
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <h2 className="font-medium text-gray-900">About</h2>
-              <p className="text-sm text-gray-500 mt-1">Version and information</p>
+              <p className="text-sm text-gray-500 mt-1">Version 1.0.1, created by Staxx TV</p>
             </div>
           </div>
         </div>

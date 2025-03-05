@@ -198,7 +198,8 @@ const Search = () => {
           video_id: video.id.videoId,
           title: video.snippet.title,
           channel_title: video.snippet.channelTitle,
-          thumbnail_url: video.snippet.thumbnails.medium.url
+          thumbnail_url: video.snippet.thumbnails.medium.url,
+          user_id: null // This will be filled by RLS if user is logged in
         });
       
       if (error) throw error;

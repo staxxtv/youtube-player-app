@@ -50,7 +50,8 @@ const Player = () => {
             video_id: channelDetails.id,
             title: `Channel: ${channelDetails.snippet.title}`,
             channel_title: channelDetails.snippet.title,
-            thumbnail_url: channelDetails.snippet.thumbnails.default.url
+            thumbnail_url: channelDetails.snippet.thumbnails.default.url,
+            user_id: null // This will be filled by RLS if user is logged in
           });
         
         if (error) throw error;
@@ -86,7 +87,8 @@ const Player = () => {
             video_id: videoDetails.id,
             title: videoDetails.snippet.title,
             channel_title: videoDetails.snippet.channelTitle,
-            thumbnail_url: videoDetails.snippet.thumbnails.default.url
+            thumbnail_url: videoDetails.snippet.thumbnails.default.url,
+            user_id: null // This will be filled by RLS if user is logged in
           });
         
         if (error) throw error;

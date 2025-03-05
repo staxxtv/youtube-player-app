@@ -17,8 +17,9 @@ interface FavoriteVideo {
 
 interface FavoriteChannel {
   id: string;
-  video_id: string; // This will be used as channel_id
+  video_id: string; // Using video_id as channel_id
   channel_title: string;
+  title: string;
   thumbnail_url: string;
 }
 
@@ -32,24 +33,23 @@ const Library = () => {
     const fetchLibrary = async () => {
       setLoading(true);
       try {
-        // Fetch saved videos with video_type = 'video'
+        // Fetch saved videos (excluding channel entries)
         const { data: videoData, error: videoError } = await supabase
           .from('favorites')
           .select('*')
-          .is('type', null); // There is no type column in the schema
+          .not('title', 'ilike', 'Channel:%');
         
         if (videoError) throw videoError;
         setVideos(videoData || []);
 
-        // Fetch favorite channels with video_type = 'channel'
+        // Fetch favorite channels (using title pattern)
         const { data: channelData, error: channelError } = await supabase
           .from('favorites')
           .select('*')
-          .neq('video_id', null)
-          .filter('title', 'ilike', 'Channel:%'); // Use a naming convention instead
+          .ilike('title', 'Channel:%');
         
         if (channelError) throw channelError;
-        setChannels(channelData as FavoriteChannel[] || []);
+        setChannels(channelData as unknown as FavoriteChannel[] || []);
       } catch (error) {
         console.error('Error fetching library:', error);
         toast.error('Failed to load library');
@@ -67,11 +67,6 @@ const Library = () => {
 
   const fetchChannelVideos = async (channelId: string) => {
     try {
-      const { data: { YOUTUBE_API_KEY }, error } = await supabase
-        .functions.invoke('get-youtube-key');
-      
-      if (error) throw error;
-
       // Redirect to a search for this channel
       navigate(`/search?channelId=${channelId}`);
     } catch (error) {
@@ -137,7 +132,7 @@ const Library = () => {
                     <div
                       key={channel.id}
                       className="flex items-center space-x-3 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => fetchChannelVideos(channel.video_id)} // Use video_id as channel_id
+                      onClick={() => fetchChannelVideos(channel.video_id)}
                     >
                       <Avatar className="h-12 w-12">
                         <img 

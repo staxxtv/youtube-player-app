@@ -9,7 +9,7 @@ const Navigation = () => {
   
   const navItems = [
     { icon: Home, label: "Home", path: "/home" },
-    { icon: Library, label: "Library", path: "/favorites" },
+    { icon: Library, label: "Library", path: "/library" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Heart, Plus } from "lucide-react";
@@ -109,13 +108,13 @@ const Player = () => {
             setComments(commentsData.items || []);
           }
 
-          // Check if channel is favorited
+          // Check if channel is favorited - using title convention
           const { data: favChannelData } = await supabase
             .from('favorites')
             .select('*')
-            .eq('type', 'channel')
-            .eq('channel_id', channelId)
-            .single();
+            .eq('video_id', channelId)  // Use video_id for storing channel IDs
+            .ilike('title', 'Channel:%')
+            .maybeSingle();
           
           setIsFavoriteChannel(!!favChannelData);
 
@@ -123,9 +122,9 @@ const Player = () => {
           const { data: favVideoData } = await supabase
             .from('favorites')
             .select('*')
-            .eq('type', 'video')
             .eq('video_id', videoId)
-            .single();
+            .not('title', 'ilike', 'Channel:%') // Exclude channel entries
+            .maybeSingle();
           
           setVideoSaved(!!favVideoData);
         }
@@ -151,8 +150,8 @@ const Player = () => {
         const { error } = await supabase
           .from('favorites')
           .delete()
-          .eq('type', 'channel')
-          .eq('channel_id', channelDetails.id);
+          .eq('video_id', channelDetails.id)
+          .ilike('title', 'Channel:%');
         
         if (error) throw error;
         toast.success('Channel removed from favorites');
@@ -162,8 +161,8 @@ const Player = () => {
         const { error } = await supabase
           .from('favorites')
           .insert({
-            type: 'channel',
-            channel_id: channelDetails.id,
+            video_id: channelDetails.id,
+            title: `Channel: ${channelDetails.snippet.title}`,
             channel_title: channelDetails.snippet.title,
             thumbnail_url: channelDetails.snippet.thumbnails.default.url
           });
@@ -187,8 +186,8 @@ const Player = () => {
         const { error } = await supabase
           .from('favorites')
           .delete()
-          .eq('type', 'video')
-          .eq('video_id', videoDetails.id);
+          .eq('video_id', videoDetails.id)
+          .not('title', 'ilike', 'Channel:%');
         
         if (error) throw error;
         toast.success('Video removed from library');
@@ -198,7 +197,6 @@ const Player = () => {
         const { error } = await supabase
           .from('favorites')
           .insert({
-            type: 'video',
             video_id: videoDetails.id,
             title: videoDetails.snippet.title,
             channel_title: videoDetails.snippet.channelTitle,

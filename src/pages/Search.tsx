@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -179,9 +178,9 @@ const Search = () => {
       const { data, error: checkError } = await supabase
         .from('favorites')
         .select('*')
-        .eq('type', 'video')
         .eq('video_id', video.id.videoId)
-        .single();
+        .not('title', 'ilike', 'Channel:%') // Exclude channel entries
+        .maybeSingle();
       
       if (checkError && checkError.code !== 'PGRST116') {
         throw checkError;
@@ -196,7 +195,6 @@ const Search = () => {
       const { error } = await supabase
         .from('favorites')
         .insert({
-          type: 'video',
           video_id: video.id.videoId,
           title: video.snippet.title,
           channel_title: video.snippet.channelTitle,

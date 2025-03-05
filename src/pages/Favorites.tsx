@@ -17,7 +17,7 @@ interface FavoriteVideo {
 
 interface FavoriteChannel {
   id: string;
-  channel_id: string;
+  video_id: string; // This will be used as channel_id
   channel_title: string;
   thumbnail_url: string;
 }
@@ -32,23 +32,24 @@ const Library = () => {
     const fetchLibrary = async () => {
       setLoading(true);
       try {
-        // Fetch saved videos
+        // Fetch saved videos with video_type = 'video'
         const { data: videoData, error: videoError } = await supabase
           .from('favorites')
           .select('*')
-          .eq('type', 'video');
+          .is('type', null); // There is no type column in the schema
         
         if (videoError) throw videoError;
         setVideos(videoData || []);
 
-        // Fetch favorite channels
+        // Fetch favorite channels with video_type = 'channel'
         const { data: channelData, error: channelError } = await supabase
           .from('favorites')
           .select('*')
-          .eq('type', 'channel');
+          .neq('video_id', null)
+          .filter('title', 'ilike', 'Channel:%'); // Use a naming convention instead
         
         if (channelError) throw channelError;
-        setChannels(channelData || []);
+        setChannels(channelData as FavoriteChannel[] || []);
       } catch (error) {
         console.error('Error fetching library:', error);
         toast.error('Failed to load library');
@@ -136,7 +137,7 @@ const Library = () => {
                     <div
                       key={channel.id}
                       className="flex items-center space-x-3 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => fetchChannelVideos(channel.channel_id)}
+                      onClick={() => fetchChannelVideos(channel.video_id)} // Use video_id as channel_id
                     >
                       <Avatar className="h-12 w-12">
                         <img 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -43,7 +42,6 @@ const Library = () => {
         return;
       }
 
-      // Fetch saved videos (excluding channel entries) - filter by user_id
       const { data: videoData, error: videoError } = await supabase
         .from('favorites')
         .select('*')
@@ -54,7 +52,6 @@ const Library = () => {
       if (videoError) throw videoError;
       setVideos(videoData || []);
 
-      // Fetch favorite channels (using title pattern) - filter by user_id
       const { data: channelData, error: channelError } = await supabase
         .from('favorites')
         .select('*')
@@ -73,13 +70,7 @@ const Library = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchLibrary();
-    } else {
-      setVideos([]);
-      setChannels([]);
-      setLoading(false);
-    }
+    fetchLibrary();
   }, [user]);
 
   const handleVideoClick = (videoId: string) => {
@@ -88,7 +79,6 @@ const Library = () => {
 
   const fetchChannelVideos = async (channelId: string) => {
     try {
-      // Redirect to a search for this channel
       navigate(`/search?channelId=${channelId}`);
     } catch (error) {
       console.error('Error fetching channel videos:', error);

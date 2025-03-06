@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -35,30 +36,21 @@ const Library = () => {
   const fetchLibrary = async () => {
     setLoading(true);
     try {
-      if (!user) {
-        setVideos([]);
-        setChannels([]);
-        setLoading(false);
-        return;
-      }
-      
-      // Fetch saved videos (excluding channel entries) for the current user only
+      // Fetch saved videos (excluding channel entries)
       const { data: videoData, error: videoError } = await supabase
         .from('favorites')
         .select('*')
         .not('title', 'ilike', 'Channel:%')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (videoError) throw videoError;
       setVideos(videoData || []);
 
-      // Fetch favorite channels (using title pattern) for the current user only
+      // Fetch favorite channels (using title pattern)
       const { data: channelData, error: channelError } = await supabase
         .from('favorites')
         .select('*')
         .ilike('title', 'Channel:%')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (channelError) throw channelError;

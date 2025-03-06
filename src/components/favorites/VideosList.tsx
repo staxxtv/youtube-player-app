@@ -23,7 +23,7 @@ const VideosList: React.FC<VideosListProps> = ({
   if (videos.length === 0) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-        <p>Your saved videos will appear here</p>
+        <p>No videos saved yet. Your saved videos will appear here.</p>
       </div>
     );
   }

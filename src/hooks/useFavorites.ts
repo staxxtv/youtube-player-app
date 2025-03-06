@@ -35,6 +35,10 @@ export const useFavorites = (user: User | null) => {
         return;
       }
 
+      // Debug the user object to ensure we have a valid ID
+      console.log("Current user:", user);
+      
+      // Fetch videos (non-channel favorites)
       const { data: videoData, error: videoError } = await supabase
         .from('favorites')
         .select('*')
@@ -42,9 +46,15 @@ export const useFavorites = (user: User | null) => {
         .not('title', 'ilike', 'Channel:%')
         .order('created_at', { ascending: false });
       
-      if (videoError) throw videoError;
+      if (videoError) {
+        console.error('Video fetch error:', videoError);
+        throw videoError;
+      }
+      
+      console.log("Fetched videos:", videoData);
       setVideos(videoData || []);
 
+      // Fetch channels
       const { data: channelData, error: channelError } = await supabase
         .from('favorites')
         .select('*')
@@ -52,7 +62,12 @@ export const useFavorites = (user: User | null) => {
         .ilike('title', 'Channel:%')
         .order('created_at', { ascending: false });
       
-      if (channelError) throw channelError;
+      if (channelError) {
+        console.error('Channel fetch error:', channelError);
+        throw channelError;
+      }
+      
+      console.log("Fetched channels:", channelData);
       setChannels(channelData as unknown as FavoriteChannel[] || []);
     } catch (error) {
       console.error('Error fetching library:', error);
@@ -63,7 +78,9 @@ export const useFavorites = (user: User | null) => {
   };
 
   useEffect(() => {
-    fetchLibrary();
+    if (user) {
+      fetchLibrary();
+    }
   }, [user]);
 
   const removeVideo = async (id: string) => {

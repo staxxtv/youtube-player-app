@@ -8,11 +8,20 @@ import { useAuth } from "@/context/AuthContext";
 import VideosList from "@/components/favorites/VideosList";
 import ChannelsList from "@/components/favorites/ChannelsList";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useEffect } from "react";
 
 const Library = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { videos, channels, loading, removeVideo, removeChannel } = useFavorites(user);
+  const { videos, channels, loading, removeVideo, removeChannel, fetchLibrary } = useFavorites(user);
+
+  // Refresh the library when the component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      console.log("Favorites page - User:", user.id);
+      fetchLibrary();
+    }
+  }, [user]);
 
   const handleVideoClick = (videoId: string) => {
     navigate(`/player/${videoId}`);

@@ -23,7 +23,7 @@ const ChannelsList: React.FC<ChannelsListProps> = ({
   if (channels.length === 0) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-        <p>Your favorite channels will appear here</p>
+        <p>No channels saved yet. Your favorite channels will appear here.</p>
       </div>
     );
   }

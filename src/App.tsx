@@ -10,6 +10,7 @@ import Player from "./pages/player";
 import Favorites from "./pages/Favorites";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Shorts from "./pages/Shorts";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useEffect } from "react";
 
@@ -40,6 +41,7 @@ const AppRoutes = () => (
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/shorts" element={<Shorts />} />
           <Route path="/player/:videoId" element={<Player />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/library" element={<Favorites />} />

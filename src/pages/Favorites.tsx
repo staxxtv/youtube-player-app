@@ -36,20 +36,29 @@ const Library = () => {
   const fetchLibrary = async () => {
     setLoading(true);
     try {
-      // Fetch saved videos (excluding channel entries)
+      if (!user) {
+        setVideos([]);
+        setChannels([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch saved videos (excluding channel entries) - filter by user_id
       const { data: videoData, error: videoError } = await supabase
         .from('favorites')
         .select('*')
+        .eq('user_id', user.id)
         .not('title', 'ilike', 'Channel:%')
         .order('created_at', { ascending: false });
       
       if (videoError) throw videoError;
       setVideos(videoData || []);
 
-      // Fetch favorite channels (using title pattern)
+      // Fetch favorite channels (using title pattern) - filter by user_id
       const { data: channelData, error: channelError } = await supabase
         .from('favorites')
         .select('*')
+        .eq('user_id', user.id)
         .ilike('title', 'Channel:%')
         .order('created_at', { ascending: false });
       
